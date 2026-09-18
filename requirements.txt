@@ -1,0 +1,28 @@
+# PENTING: file ini WAJIB dipasang dengan --no-deps (lihat target `install` di
+# Makefile). Alasannya: mt5linux 0.1.9 menaruh hasil `pip freeze` penulisnya
+# sebagai install_requires -- 30 paket ter-pin mati, termasuk toolchain rilis
+# mereka (twine, keyring, SecretStorage) dan rpyc==5.0.1. Pin itu bukan syarat
+# kompatibilitas, cuma bekas environment 2021. Tanpa --no-deps, rpyc==5.0.1 di
+# sana bentrok dengan rpyc==6.0.2 di bawah dan pip berhenti dengan
+# ResolutionImpossible.
+#
+# Konsekuensinya: dependency transitif TIDAK diselesaikan pip, jadi seluruh
+# closure harus ditulis eksplisit di bawah ini.
+
+# Client RPC yang dipakai dari macOS untuk menembak MT5 di dalam Wine.
+mt5linux==0.1.9
+
+# Dipakai mt5linux beneran (import rpyc / from plumbum import cli /
+# from numpy import array). Sisa 27 paket di install_requires-nya tidak dipakai.
+#
+# rpyc: versi kedua sisi harus sama persis. Python Windows di prefix Wine
+# dipasang rpyc==6.0.2 juga -- lihat step_deps() di setup_wine_mt5.sh.
+rpyc==6.0.2
+plumbum>=1.7.0
+numpy>=1.21.4
+
+# Dependency plumbum di Python < 3.13 (venv ini Python 3.9).
+typing-extensions>=4.0.0; python_version < "3.13"
+
+# Hanya terpasang di Windows; di macOS pip melewatinya karena marker ini.
+MetaTrader5>=5.0.45; sys_platform == "win32"
